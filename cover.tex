@@ -1,0 +1,106 @@
+\newcommand{\MODULE}{Structures de données}
+\newcommand{\SUJET}{Listes, piles et files à l'aide des pointeurs}
+\newcommand{\ANNEE}{2014 -- 2015}
+\newcommand{\AUTEUR}{Youssef Bouhjira}
+\newcommand{\FILIERE}{1\textsuperscript{ère} année Ingénierie Logicielle et Intégration des Systèmes}
+\newcommand{\PROF}{Mr. Bekkhoucha}
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{book}
+
+\usepackage[francais]{babel} % On utilise le français bien sur
+\usepackage{xltxtra,fontspec,xunicode} %UTF-8
+
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{calc}
+\usepackage{xcolor}
+\usepackage{float}
+
+\definecolor{darkBlue}{HTML}{000088}
+
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\newcommand*{\titleGP}{\begingroup % Create the command for including the title page in the document
+
+
+\begin{figure}
+\centering
+\makebox[\textwidth][c]{
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=80pt]{logo_fstm.jpg}
+\end{subfigure}%
+\hspace{120pt}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=80pt]{logo_uh2.jpg}
+\end{subfigure}
+}
+\end{figure}
+
+\centering % Center all text
+
+%\vspace*{2\baselineskip} % Whitespace between location/year and editors
+\vspace*{2\baselineskip} % Whitespace between location/year and editors
+
+\vspace*{\baselineskip} % White space at the top of the page
+
+\textcolor{darkBlue}{
+\rule{\textwidth}{1.6pt}\vspace*{-\baselineskip}\vspace*{2pt} % Thick horizontal line
+\rule{\textwidth}{0.4pt}\\[\baselineskip] % Thin horizontal line
+}
+
+\textcolor{blue}{
+{\Huge \textbf{\SUJET}}\\[0.2\baselineskip]
+}
+
+\scshape
+\textcolor{darkBlue}{\textbf{Module : \MODULE}} \\ % Tagline(s) or further description
+\vspace*{2\baselineskip}
+\textcolor{darkBlue}{\ANNEE}\par
+
+\textcolor{darkBlue}{
+\rule{\textwidth}{0.4pt}\vspace*{-\baselineskip}\vspace{3.2pt} % Thin horizontal line
+\rule{\textwidth}{1.6pt}\\[\baselineskip] % Thick horizontal line
+}
+
+
+
+\vspace*{2\baselineskip}
+
+Réalisé par \\
+{\Large \AUTEUR \par}
+{\itshape \par}
+
+\vspace*{2\baselineskip}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.3]{ilis.png}
+\end{figure}
+
+\vspace*{2\baselineskip}
+
+Encadré par \\
+{\Large \PROF \par}
+
+\endgroup}
+
+%----------------------------------------------------------------------------------------
+%	BLANK DOCUMENT
+%----------------------------------------------------------------------------------------
+\begin{document}
+
+\pagestyle{empty} % Removes page numbers
+
+\titleGP % This command includes the title page
+
+\end{document}
