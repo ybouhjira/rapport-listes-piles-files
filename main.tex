@@ -1,0 +1,573 @@
+\documentclass[a4paper]{article}
+
+\usepackage[francais]{babel}
+\usepackage{xltxtra,fontspec,xunicode}
+
+\usepackage{listings}
+
+\usepackage{graphicx}
+\usepackage{float}
+
+
+\usepackage{listings}
+\lstset{                                                                          
+   language=C,
+   basicstyle=\ttfamily,                                                           
+   frame=lrtb ,
+   columns=fullflexible      
+}
+
+%space paragraphs
+\setlength{\parskip}{\baselineskip}%
+
+\begin{document}
+
+\tableofcontents
+
+\section{Introduction}
+Le but de ce TP est de réaliser une implémentation des structures de données qui
+sont les listes, les piles et les files en language C à l'aide des pointeurs.
+
+Pour chaque structure de données on devra être capable d'insérer, ou de supprimer
+un élément, ou encore d'afficher, copier ou savoir la taille de la structure.
+
+\section{Les listes simplement chainées}
+
+\subsection{Structure de données}
+
+\begin{lstlisting}
+typedef struct Liste 
+{
+  struct Liste *suiv;
+  int val;
+} Liste;
+\end{lstlisting}
+
+Cette structure reprèsente un élément de la liste chainée et contient deux variables: 
+
+\begin{itemize}
+  \item \textbf{suiv}: L'élément suivant cet élément.
+
+  \item \textbf{val}: La valeur contenu dans cet élément.
+\end{itemize}
+
+\subsection{Fonctions}
+\subsubsection{Insértion en tête}
+
+\begin{description}
+  \item[Nom de la fonction:] liste\_ajout\_debut
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item Liste **liste : La liste dont laquelle on va insérer
+      \item int val : La valeur à insérer
+    \end{itemize}
+
+  \item[Description:] \hfill \\ 
+    Insére l'élément au début de la liste, en remplacant la tête de la liste 
+    par le nouvel élément.
+
+  \item[Code:] \hfill
+  \begin{lstlisting}
+void liste_ajout_debut(Liste **liste, int val)
+{
+  Liste *nouveau = liste_creer(val);
+  if(*liste)
+    {
+      Liste *tete = *liste;
+      nouveau->suiv = tete;
+    }
+  *liste = nouveau;
+}
+  \end{lstlisting}
+\end{description}
+
+\subsubsection{Insértion en queue}
+
+\begin{description}
+  \item[Nom de la fonction:] liste\_ajout\_fin
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item Liste **liste : La liste dont laquelle on va insérer
+      \item int val : La valeur à insérer
+    \end{itemize}
+
+  \item[Description:] \hfill \\ 
+    Insére l'élément au début de la liste, en parcourant la liste jusqu'à la
+    fin et en attachant le nouveal élément à la queue de la liste.
+
+
+  \item[Code:] \hfill 
+  \begin{lstlisting}
+void liste_ajout_fin(Liste **liste, int val)
+{
+  Liste *courant = *liste;
+  Liste *nouveau = liste_creer(val);
+  if(!(*liste)) *liste = nouveau;
+  else
+    {
+      for(; courant->suiv; courant = courant->suiv);
+      courant->suiv = nouveau;
+    }
+}
+  \end{lstlisting}
+\end{description}
+
+
+\subsubsection{Insértion dans la liste}
+\begin{description}
+  \item[Nom de la fonction:] liste\_inserer
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item Liste **liste : La liste dont laquelle on va insérer
+      \item int val : La valeur à insérer
+      \item int pos : La position de l'insertion
+    \end{itemize}
+
+  \item[Description:] \hfill \\ 
+    Insert un élément dans la position donnée, en parcourant la liste et incrémentant
+    un compteur qui permet de savoir si on est arrivé à la bonne position.
+    
+  \item[Code:] \hfill 
+  \begin{lstlisting}
+void liste_inserer(Liste **liste, int val, int pos)
+{
+  // Conditions
+  assert(pos >= 0);
+
+  // Nouvel élément pour la valeur
+  Liste *nouveau = liste_creer(val);
+
+  // Insértion
+  if(pos == 0)
+    {
+      liste_ajout_debut(liste, val);
+    }
+  else if(!(*liste))
+    {
+      assert(0); // Erreur : liste vide pos doit etre 0
+    }
+  else
+    {
+      Liste *courant = *liste;
+      int i;
+      for(i = 0; i < pos - 1 && courant->suiv; ++i)
+        courant = courant->suiv;
+      if(i != pos - 1) assert(0); // pos > taille
+      nouveau->suiv = courant->suiv;
+      courant->suiv = nouveau;
+    }
+}
+  \end{lstlisting}
+\end{description}
+
+
+\subsubsection{Suppression d'un élement de la liste}
+\begin{description}
+  \item[Nom de la fonction:] liste\_supprimer
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item Liste **liste : La liste de laquelle on va supprimer.
+      \item int pos : La position de la suppression.
+    \end{itemize}
+
+  \item[Description:] \hfill \\ 
+    Supprime l'élément qui se trouve à la position indiquée, en parcourant la 
+    liste jusqu'à cette position, et en détachant l'élément de la liste.
+
+
+  \item[Code:] \hfill \\
+  \begin{lstlisting}
+void liste_supprimer(Liste **liste, int pos)
+{
+  assert(pos >= 0);
+  assert(*liste);
+
+  Liste *elem;
+  if(!pos)
+    {
+      elem = *liste;
+      *liste = (*liste)->suiv;
+    }
+  else
+    {
+      int i;
+      Liste *courant = *liste;
+      for (i = 0; i < pos - 1 && courant->suiv; ++i)
+        courant = courant->suiv;
+      if(i != pos - 1) assert(0); // pos > taille - 1
+      elem = courant->suiv;
+      courant->suiv = courant->suiv->suiv;
+    }
+
+  // Suppression de la mémoire allouée
+  free(elem);
+}
+  \end{lstlisting}
+\end{description}
+
+
+\subsubsection{Copie de la liste}
+\begin{description}
+  \item[Nom de la fonction:] liste\_copier
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item Liste **liste : Une liste
+    \end{itemize}
+
+  \item[Sortie:] \hfill
+    Une copie de la liste.
+
+  \item[Description:] \hfill \\ 
+    Parcours la liste en ajoutant ses éléments dans une seconde liste, et 
+    retourne cette dernière.
+    
+  \item[Code:] \hfill
+  \begin{lstlisting}
+Liste* liste_copier(Liste *liste)
+{
+  Liste *ptr = liste, *copie = NULL, *ptrCopie = NULL;
+
+  for(; ptr; ptr = ptr->suiv) {
+      if(!copie)
+        {
+          ptrCopie = copie = liste_creer(ptr->val);
+        }
+      else
+        {
+          ptrCopie->suiv = liste_creer(ptr->val);
+          ptrCopie = ptrCopie->suiv;
+        }
+    }
+
+  return copie;
+}
+  \end{lstlisting}
+\end{description}
+
+\subsubsection{Affichage de la liste}
+\begin{description}
+  \item[Nom de la fonction:] liste\_afficher
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item Liste *liste : Une liste
+    \end{itemize}
+
+  \item[Description:] \hfill \\ 
+    Affiche la liste.
+
+  \item[Code:] \hfill 
+  \begin{lstlisting}
+void liste_afficher(Liste *liste, Liste *fin)
+{
+  Liste *courant = liste;
+  printf("[");
+  while (courant && courant != fin)
+    {
+      printf("%d",courant->val);
+      courant = courant->suiv;
+      if(courant && courant != fin) printf(", ");
+    }
+  printf("]");
+}
+  \end{lstlisting}
+
+\end{description}
+
+
+\section{Les piles}
+\subsection{Structure de données}
+La même que les listes chainées.
+
+\begin{lstlisting}
+typedef Liste Pile;
+\end{lstlisting}
+
+\subsection{Fonctions}
+\subsubsection{Empilement}
+\textbf{Nom de la fonttion:} pile\_empiler \\
+
+Utilise la fonction d'ajout en tête d'une liste chainée.
+\begin{lstlisting}
+#define pile_empiler liste_ajout_debut
+\end{lstlisting}
+
+\subsubsection{Dépilement}
+\begin{description}
+  \item[Nom de la fonction:] pile\_depiler
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item Pile **pile : Une pile non vide
+    \end{itemize}
+
+  \item[Sortie:] \hfill
+    La valeur supprimée.
+
+  \item[Description:] \hfill \\ 
+    Supprime l'élément en tête de pile (en utiliant la fonction de suppression en tête de liste)
+    et renvoie ça valeur.
+
+  \item[Code:] \hfill
+  \begin{lstlisting}
+int pile_depiler(Pile **pile)
+{
+  assert(*pile);
+
+  int valeur = (*pile)->val;
+  liste_supprimer(pile, 0);
+  return valeur;
+}
+  \end{lstlisting}
+\end{description}
+
+
+\subsubsection{Copie de la pile}
+\begin{description}
+  \item[Nom de la fonction:] pile\_copier
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item Pile **pile : Une pile
+    \end{itemize}
+
+  \item[Sortie:] \hfill
+    Pile* : Copie de la pile.
+
+  \item[Description:] \hfill \\ 
+    Dépile tous les élements de la pile et les empile dans deux autres piles.
+    L'une sera retournée et on change le pointeur ``pile'' pour pointer 
+    sur l'autre.
+
+  \item[Code:] \hfill
+  \begin{lstlisting}
+Pile* pile_copier(Pile **pile)
+{
+  Pile *copie = NULL, *pile2 = NULL;
+
+  while(*pile)
+    {
+      int val = pile_depiler(pile);
+      pile_empiler(&pile2, val);
+      pile_empiler(&copie, val);
+    }
+
+  *pile = pile2;
+
+  return copie;
+}
+  \end{lstlisting}
+
+\end{description}
+
+
+\subsubsection{Affichage de la pile}
+\begin{description}
+  \item[Nom de la fonction:] pile\_afficher
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item Pile **pile : Une pile
+    \end{itemize}
+
+  \item[Description:] \hfill \\ 
+    Dépile et affiche les éléments de la pile un par un dans une autre pile.
+    Puis change le pointeur ``pile'' pour qu'il pointe sur cette dernière.
+
+  \item[Code:] \hfill 
+  \begin{lstlisting}
+void pile_afficher(Pile **pile)
+{
+  Pile *copie = NULL;
+  while(*pile)
+    pile_empiler(&copie, pile_depiler(pile));
+
+  int i = 0;
+  while(copie)
+    {
+      int val = pile_depiler(&copie);
+      printf("%d : %d\n", i++, val);
+      pile_empiler(pile, val);
+    }
+}
+  \end{lstlisting}
+
+\end{description}
+\section{Les files}
+\subsection{Structure de données}
+\begin{lstlisting}
+typedef Liste FileElem;
+
+typedef struct File
+{
+  FileElem *tete, *queue;
+}File;
+\end{lstlisting}
+
+Un élement de la file à la même structure que selui de la liste, avec ses deux
+variables \textbf{suiv} et \textbf{val}.
+
+On déclare un structure \textbf{File} qui reprèsente la file et contient ça
+tête et ça queue.
+
+\subsection{Fonctions}
+\subsubsection{Enfilement}
+
+\begin{description}
+  \item[Nom de la fonction:] file\_enfiler
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item File *file: La file
+      \item int val : La valeur à enfiler
+    \end{itemize}
+
+  \item[Description:] \hfill \\ 
+    Ajoute un élèment à la queue de la file. Si la pile est vide La tête et la
+    queue vont pointer sur la même élément.
+
+  \item[Code:] \hfill 
+  \begin{lstlisting}
+void file_enfiler(File *file, int val)
+{
+  FileElem *nouveau = calloc(1, sizeof(FileElem));
+  nouveau->val = val;
+
+
+  if(!file->tete)
+    {
+      file->tete = file->queue = nouveau;
+    }
+  else
+    {
+      file->queue->suiv = nouveau;
+      file->queue = file->queue->suiv;
+    }
+}
+  \end{lstlisting}
+\end{description}
+
+\subsubsection{Défilement}
+
+\begin{description}
+  \item[Nom de la fonction:] file\_defiler
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item File *file: Une file non vide
+    \end{itemize}
+
+ \item[Sortie:] \hfill
+   int : La valeur supprimée.
+
+  \item[Description:] \hfill \\ 
+    Supprime l'élément en tête de la file.
+
+  \item[Code:] \hfill 
+  \begin{lstlisting}
+
+int file_defiler(File *file)
+{
+  assert(file->tete);
+  assert(file->queue);
+
+  int valeur = file->tete->val;
+
+
+  if(file->tete == file->queue)
+    {
+      free(file->queue);
+      file->tete = file->queue = NULL;
+    }
+  else
+    {
+      FileElem *suppr = file->tete;
+      file->tete = file->tete->suiv;
+      free(suppr);
+    }
+
+  return valeur;
+}
+  \end{lstlisting}
+
+
+\end{description}
+
+
+
+\subsubsection{Copie de la file}
+\begin{description}
+  \item[Nom de la fonction:] file\_copier
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item File *file: Une file
+    \end{itemize}
+
+ \item[Sortie:] \hfill
+   File* : Une copie de la file
+
+  \item[Description:] \hfill \\ 
+    Défile les éléments de la file un par un et les enfile dans deux autres files.
+    L'une sera retournée comme copie et on change le pointeur ``file'' pour pointer 
+    sur l'autre.
+
+  \item[Code:] \hfill
+  \begin{lstlisting}
+File file_copier(File *file)
+{
+  File copie = {NULL, NULL}, file2 = {NULL, NULL};
+
+  while(file->tete)
+    {
+      int val = file_defiler(file);
+      file_enfiler(&file2, val);
+      file_enfiler(&copie, val);
+    }
+
+  *file = file2;
+  return copie;
+}
+  \end{lstlisting}
+\end{description}
+
+\subsubsection{Affichage de la file}
+\begin{description}
+  \item[Nom de la fonction:] file\_afficher
+
+  \item[Entrées:] \hfill
+    \begin{itemize}
+      \item File *file: Une file
+    \end{itemize}
+
+  \item[Description:] \hfill \\ 
+    Défile les éléments de la file un par un et les affiche. Le pointeur ``file''
+    et alors changé pour pointer sur la nouvel file.
+
+  \item[Code:] \hfill
+  \begin{lstlisting}
+void file_afficher(File *file)
+{
+  File copie = {NULL, NULL};
+
+  printf("[");
+  while(file->tete)
+    {
+      int valeur = file_defiler(file);
+      printf("%d", valeur);
+      if(file->queue) printf(", ");
+      file_enfiler(&copie, valeur);
+    }
+
+  printf("]");
+
+  *file = copie;
+}
+  \end{lstlisting}
+\end{description}
+\end{document}
